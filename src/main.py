@@ -1,6 +1,7 @@
 import json
 import random
 import os
+import uuid
 #1
 #2
 
@@ -12,7 +13,7 @@ class ElectricalNetworkGenerator:
         self.node_id = 1
         self.boards = []
 
-    def generate_board(self, level, position, parent_phase, parent_id=None):
+    def generate_board(self, level, position, parent_phase, parent_id=None, parent_circuit_id=None):
         if level <=1:
             # force level 1 and 2 to be 3 phase
             str_board_phase = "Three-phase"
@@ -28,14 +29,58 @@ class ElectricalNetworkGenerator:
         str_board_location = str_board_section + "/" + str_board_floor+"/"+random.choice(["RS RM1", "RIS RM2","RIS RM3","RIS RM4",""])        
     
         board = {
-            "node_id": self.node_id,
-            "board_parent_node_id": parent_id,
-            "name": f"DB L: {level}: {self.node_id}",
-            "board_section" : str_board_section,
-            "board_floor" : str_board_floor,
+            "board_id": self.node_id,
+            "board_supply_source_reference_id": parent_id,
+            "board_supply_source_circuit_reference_id" : parent_circuit_id,
+            "board_reference": f"DB L: {level}: {self.node_id}",
+            "board_reference_type": "DB",
+            "board_nominal_voltage": "",
+            "board_phase": str_board_phase,
+            "board_circuit_phase_naming":  "",
+            "Is_Mains_Distribution": "",
+            "board_manufacturer": "",
+            "board_function": "",
+            "board_ways": 0,
+            "board_type":  " ",
+            "board_rating": " ",
+            "board_asset_number": "",
+            "board_earth_loop": "",
+            "board_PSSC": "",   
+            "board_OPT": "",
+            "board_OPT_type":  "",
+            "board_location_block": "",
+            "board_location_floor": "", 
+            "board_location": "",
+            "board_picture_id": "",
+            "board_location_block" : str_board_section,
+            "board_location_floor" : str_board_floor,
             "board_location": str_board_location,
-            "phase": str_board_phase,
-            "circuits": []
+            "board_phase": str_board_phase,
+            "board_rcd": "",
+            "board_rcd_poles": "n/a",
+            "board_rcd_rating": "",
+            "current_mod_number": 0,
+            "issue_number": 0,
+            "date_last_amended": "",
+            "spreadsheet_filename": "",
+            "DateObsolete": "0000-00-00 00:00:00",
+            "board_comments": "",
+            "building_id": "BUILDING_id",
+            "amend_status": "",
+            "board_last_thermo_date": "",
+            "board_next_thermo_date": "",
+            "qrcode_id": "",
+            "qrcode_id_assigned_date": "",
+            "spd_bs_en": "",
+            "spd_bs_en_type": "",
+            "spd_type_t1": "",
+            "spd_type_t2": "",
+            "spd_type_t3": "",
+            "spd_type_na": "",
+            "return_original": 1,
+            "qrcode_id_encoded": "",
+            "is_migrated": 0,
+            "tbl_circuits": []
         }
         if level == self.num_levels:
             str_print = (f"db (i{level}) fed from cct {position}, board phase-{str_board_phase} - FINAL")
@@ -44,6 +89,7 @@ class ElectricalNetworkGenerator:
         print(Indent(str_print, 5*level))
         
         current_id = self.node_id
+        current_circuit_id = ""
         self.node_id += 1
 
         if level < self.num_levels:
@@ -62,9 +108,10 @@ class ElectricalNetworkGenerator:
                     lst_cct_phases = ["S"]
                     circuit_type = random.choice(["RING", "RAD"])
 
-
+                current_circuit_id= str(uuid.uuid4()).lower()
                 for str_cct_phase in lst_cct_phases:
                     circuit = {
+                        "circuit_id": current_circuit_id,
                         "circuit_number": cct_index,
                         "circuit_level" : level,
                         "circuit_phase": str_cct_phase,
@@ -84,10 +131,10 @@ class ElectricalNetworkGenerator:
                         print(Indent("_______", 5*level))
                         str_print = (f"level:{level}, circuit-{cct_index} phase-{str_cct_phase} circuit type={circuit_type} not final")
                         print(Indent(str_print, 5*level))
-                        child_board = self.generate_board(level + 1, cct_index, str_child_board_phase, current_id)
+                        child_board = self.generate_board(level + 1, cct_index, str_child_board_phase, current_id, current_circuit_id)
                         #set the child node for the cct
-                        circuit["child_board_node_id"] = child_board["node_id"] 
-                    board["circuits"].append(circuit)
+                        circuit["child_board_node_id"] = child_board["board_id"] 
+                    board["tbl_circuits"].append(circuit)
 
         self.boards.append(board)
         return board
@@ -134,7 +181,7 @@ def main():
 
     ###
     # Specify the folder path
-    folder_path = r'C:\Users\micha\Dropbox\DistributionBoardNetworkScripts\distnetjs\distnet-react\src'
+    folder_path = r'C:\Users\micha\Dropbox\distnetwork\distnet-react\src'
 
     # Ensure the directory exists, if not, create it
     os.makedirs(folder_path, exist_ok=True)
