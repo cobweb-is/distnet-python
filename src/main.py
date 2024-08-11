@@ -2,6 +2,7 @@ import json
 import random
 import os
 #1
+#2
 
 class ElectricalNetworkGenerator:
     def __init__(self, num_roots, num_levels, num_children_per_node):
