@@ -93,29 +93,29 @@ class ElectricalNetworkGenerator:
         self.node_id += 1
 
         if level < self.num_levels:
-            num_of_ccts = 6
+            num_of_ccts = 3
             num_children = random.randint(1, self.num_children_per_node)
             #num_children = 2
             for cct_index in range(num_of_ccts):
                 if str_board_phase == "Three-phase":
-                    circuit_type = random.choice(["RING", "RAD", "TP"])
-                    if circuit_type == "TP":
+                    circuit_is_3phase = random.choice(["RING", "RAD", "TP"])
+                    if circuit_is_3phase == "TP":
                         lst_cct_phases = ["TP"]
                     else:
                         lst_cct_phases = ["L1", "L2", "L3"]
                     
                 else:
                     lst_cct_phases = ["S"]
-                    circuit_type = random.choice(["RING", "RAD"])
+                    circuit_is_3phase = random.choice(["RING", "RAD"])
 
                 current_circuit_id= str(uuid.uuid4()).lower()
                 for str_cct_phase in lst_cct_phases:
                     circuit = {
                         "circuit_id": current_circuit_id,
-                        "circuit_number": cct_index,
+                        "circuit_reference": cct_index,
                         "circuit_level" : level,
-                        "circuit_phase": str_cct_phase,
-                        "circuit_type": circuit_type,
+                        #"circuit_phase": str_cct_phase,
+                        "circuit_is_3phase": circuit_is_3phase,
                         "child_board_node_id": None
                     }
 
@@ -123,13 +123,13 @@ class ElectricalNetworkGenerator:
                     if num_children > 0:
                         #force board phaseto be 3phase if supplied by a 3 phase board
                         #if the cct is a TP then the child board must be TP
-                        if circuit_type == "TP":
+                        if circuit_is_3phase == "TP":
                             str_child_board_phase = "Three-phase"
                         else:
                             str_child_board_phase = "Single-phase"
                         print(Indent("|  ", 5*level))
                         print(Indent("_______", 5*level))
-                        str_print = (f"level:{level}, circuit-{cct_index} phase-{str_cct_phase} circuit type={circuit_type} not final")
+                        str_print = (f"level:{level}, circuit-{cct_index} phase-{str_cct_phase} circuit type={circuit_is_3phase} not final")
                         print(Indent(str_print, 5*level))
                         child_board = self.generate_board(level + 1, cct_index, str_child_board_phase, current_id, current_circuit_id)
                         #set the child node for the cct
@@ -166,7 +166,7 @@ def charprint(char, num_times):
 def main():
     # Parameters
     num_roots = 1
-    num_levels = 4
+    num_levels = 5
     num_children_per_node = 4
 
     # Generate Electrical Distribution Network data

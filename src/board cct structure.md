@@ -82,6 +82,16 @@
                 }
 
 ###########
+
+                        ok "circuit_id": current_circuit_id,
+                        ok "circuit_number": cct_index,
+                        ok "circuit_reference": cct_index,
+                        "circuit_level" : level,
+                        "circuit_phase": str_cct_phase,
+                        "circuit_type": circuit_type,
+                        "circuit_is_3phase":  circuit_type,
+                        "child_board_node_id": None
+###########
         single_cctdict = {
                         "circuit_id": str(uuid.uuid4()).lower(),
                         "board_id": m_board_id_guid,
