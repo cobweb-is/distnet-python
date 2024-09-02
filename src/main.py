@@ -7,7 +7,7 @@ import random
 # Parameters
 C_NUM_ROOTS  = 1
 C_NUM_LEVELS = 3 #get_random_int(1, 5)
-C_NUM_OF_WAYS = 2 #get_random_int(1, 6)
+C_NUM_OF_WAYS = 3 #get_random_int(1, 6)
 C_NUM_OF_CCT_BRANCHES = 0 # get_random_int(0, 2)
 
 class ElectricalNetworkGenerator:
@@ -76,9 +76,9 @@ class ElectricalNetworkGenerator:
                     circuit = {
                         "circuit_id": str_circuit_id,
                         "board_id": board["board_id"],
-                        "circuit_supplies_board_id" : "",
                         "circuit_reference": cct_index + 1,
                         "circuit_phase": str_cct_phase,
+                        "circuit_supplies_board_id" : arr_board_supply_source_reference_circuit_id ,
                         "circuit_is_3phase": circuit_type,
                         "circuit_equipment_connected": f"-<{board["board_reference"]} : {circuit_type}"
                     }
@@ -106,6 +106,7 @@ class ElectricalNetworkGenerator:
                             child_board_id = self.generate_board(level + 1, cct_index + 1, str_board_phase, board["board_id"], parent_id, circuit["circuit_is_3phase"])
                             if child_board_id is None:
                                 print("Warning: generate_board returned None.")
+                        arr_board_supply_source_reference_circuit_id = [child_board_id]
                     else:
                         print(f"SP {str_cct_phase}")
                         print("--")
@@ -113,13 +114,15 @@ class ElectricalNetworkGenerator:
                         child_board_id = self.generate_board(level + 1, cct_index + 1, str_board_phase, board["board_id"], parent_id, circuit["circuit_is_3phase"])
                         if child_board_id is None:
                             print("Warning: generate_board returned None.")
+                        arr_board_supply_source_reference_circuit_id  = [child_board_id]
                     if level ==1:
                          #For level 1 ccts add additional branch boards for each way
                         for branch_index in range(C_NUM_OF_CCT_BRANCHES):
                             self.node_id += 1
                             child_board_id =self.generate_board(level + 1, cct_index + 1, str_board_phase, board["board_id"], parent_id,circuit["circuit_is_3phase"], "-B-")
+                            arr_board_supply_source_reference_circuit_id.append(child_board_id) 
                             print(child_board_id )
-                    circuit["circuit_supplies_board_id"] = child_board_id
+                    circuit["circuit_supplies_board_id"] = arr_board_supply_source_reference_circuit_id 
                     self.circuits.append(circuit)
         return board["board_id"]
         
